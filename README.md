@@ -1,11 +1,27 @@
 # FreedomEnterprise
 I've been working on a new electronic enterprise system that's fully peer-to-peer, with no trusted third party.   
 
-The Freedom Enterprise will use [Freedom Cash](https://FreedomCash.org) ([see scan](https://zkevm.polygonscan.com/token/0xa1e7bB978a28A30B34995c57d5ba0B778E90033B)) as its decentralized currency.  
+The Freedom Enterprise uses [Freedom Cash](https://FreedomCash.org) ([see scan](https://zkevm.polygonscan.com/token/0xa1e7bB978a28A30B34995c57d5ba0B778E90033B)) as its decentralized currency.  
 
 The smart contract of the Freedom Enterprise will be completed and deployed together with its distributed app once at least one of the following conditions are true:  
 1. [Freedom Cash](https://FreedomCash.org) has at least 9000 holders  
 2. It is March 12th of 2024 in Switzerland
+
+## Usage Example
+
+```ts
+
+```
+
+## Execute Usage Example Bollinger
+
+```sh
+deno run --allow-read --allow-write ...
+```
+
+## Usage Example Client
+There shall be many trustworthy frontends for Freedom Cash.  
+Programmers will be able to integrate Freedom Cash as svelte, angular or vue component starting on March 2024.
 
 ## Donations
 Thanks to [Freedom Cash](https://FreedomCash.org), we are already free.  
