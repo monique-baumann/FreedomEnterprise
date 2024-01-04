@@ -1,5 +1,5 @@
 import { ethers, Logger } from "../deps.ts"
-import { ITask, getLogger, getProvider, getContract, FE, FC, baseURLScan } from "./constants-types-infrastructure.ts"
+import { ITask, IFunding, IReward, getLogger, getProvider, getContract, FE, FC, baseURLScan } from "./constants-types-infrastructure.ts"
 
 export class FreedomEnterprise {
 
@@ -30,7 +30,7 @@ export class FreedomEnterprise {
 
     public async createTask(descriptionInMarkdown: string, fundingAmountFC: number): Promise<void> {
         const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
-        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10**18))
+        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
         const cost = buyPrice * BigInt(fundingAmountFC)
         this.logger.debug(`creating task. taskCounter before: ${await this.getTaskCounter()}`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.createTask(descriptionInMarkdown, parsedAmount, { value: cost }))
@@ -43,43 +43,81 @@ export class FreedomEnterprise {
             throw new Error(`is the task ${taskID} already available`)
         }
         const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
-        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10**18))
+        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
         const cost = buyPrice * BigInt(fundingAmountFC)
         this.logger.info(`funding task ${taskID} with amount: ${parsedAmount} FC at price ${buyPrice} paying in total: ${cost} ETH`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, parsedAmount, { value: cost }))
     }
 
-    public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void>{
+    public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void> {
         this.logger.info(`setting completion level for task ${taskID} to: ${completionLevel}`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.setCompletionLevel(taskID, completionLevel))
     }
 
-    public async reward(receiver: string, taskID: number, amount: number): Promise<void> {
+    public async rewardSomeone(receiver: string, taskID: number, amount: number): Promise<void> {
         this.logger.info(`assigning ${amount} Freedom Cash as reward for task ${taskID} to receiver: ${receiver}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.reward(receiver, taskID, amount))
+        const parsedAmount = ethers.parseEther(amount.toString())
+        await this.awaitTransaction(await this.contractFreedomEnterprise.rewardSomeone(receiver, taskID, parsedAmount))
+    }
+    public async getClaimableRewards(receiver: string): Promise<bigint> {
+        this.logger.info(`getting claimable rewards for ${receiver}`)
+        return this.contractFreedomEnterprise.getClaimableRewards(receiver)
     }
 
     public async claimRewards(): Promise<void> {
         this.logger.info(`claimingRewards`)
+        this.logger.info(`fc balance in smart contract before: ${await this.contractFreedomCash.balanceOf(FE)}`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.claimRewards())
+        this.logger.info(`fc balance in smart contract after : ${await this.contractFreedomCash.balanceOf(FE)}`)
     }
 
     public async getTask(taskID: number): Promise<ITask> {
         this.logger.info(`reading task ${taskID}`)
         const raw = await this.contractFreedomEnterprise.tasks(taskID)
+        this.logger.info(`${raw}`)
+
         return {
             createdBy: raw[0],
-            createdOn: raw[1],
+            timestamp: raw[1],
             descriptionInMarkdown: raw[2],
-            funding: raw[3],
-            completionLevel: raw[4]
+            completionLevel: raw[3]
+        }
+    }
+    public async getFunding(fundingID: number): Promise<ITask> {
+        this.logger.info(`reading funding ${fundingID}`)
+        const raw = await this.contractFreedomEnterprise.fundings(fundingID)
+        this.logger.info(`${raw}`)
+
+        return {
+            from: raw[0],
+            amount: raw[1],
+            timestamp: raw[2]
+        }
+    }
+    public async getReward(rewardID: number): Promise<ITask> {
+        this.logger.info(`reading reward ${rewardID}`)
+        const raw = await this.contractFreedomEnterprise.tasks(rewardID)
+        this.logger.info(`${raw}`)
+
+        return {
+            to: raw[0],
+            amount: raw[1],
+            timestamp: raw[2],
+            claimed: raw[3]
         }
     }
     public async getTaskCounter(): Promise<number> {
         this.logger.info(`reading taskCounter`)
         return this.contractFreedomEnterprise.taskCounter()
     }
-
+    public async getFundingCounter(): Promise<number> {
+        this.logger.info(`reading fundingCounter`)
+        return this.contractFreedomEnterprise.fundingCounter()
+    }
+    public async getRewardCounter(): Promise<number> {
+        this.logger.info(`reading rewardCounter`)
+        return this.contractFreedomEnterprise.rewardCounter()
+    }
     private async awaitTransaction(tx: any): Promise<void> {
         this.logger.info(`transaction ${baseURLScan}tx/${tx.hash}`)
         await tx.wait()

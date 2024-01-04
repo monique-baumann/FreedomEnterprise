@@ -1,16 +1,27 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FE = "0xdB8042acaEa8d5656aDE8126c250789bfc023639"
+export const FE = "0x210CedD19114F10C267432817028D5D6a2129375"
 export const FC = "0x1E7A208810366D0562c7Ba93F883daEedBf31410"
 export const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 export const baseURLScan = "https://zkevm.polygonscan.com/"
 
 export interface ITask {
     createdBy: string
-    createdOn: number
+    timestamp: number
     descriptionInMarkdown: string
-    funding: bigint
     completionLevel: bigint
+}
+
+export interface IFunding {
+    from: string
+    amount: bigint
+    timestamp: number
+}
+export interface IReward {
+    to: string
+    amount: bigint
+    timestamp: number
+    claimed: boolean
 }
 
 export function getProvider(logger: Logger) {
