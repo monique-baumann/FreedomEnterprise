@@ -1,0 +1,214 @@
+[
+	{
+		"inputs": [],
+		"name": "HundredPercentIsEnough",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "OnlyTheCreatorOfTheTaskCanDoThat",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TaskIDNotAvailableYet",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "YouCannotRewardWithMoreThanFunding",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "claimRewards",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "claimableRewardsPerTask",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "claimedRewardsPerTask",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "descriptionInMarkdown",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "fundingAmountFC",
+				"type": "uint256"
+			}
+		],
+		"name": "createTask",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "freedomCashSmartContract",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskID",
+				"type": "uint256"
+			}
+		],
+		"name": "fundTask",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "receiver",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "taskID",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "reward",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskID",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint24",
+				"name": "completionLevel",
+				"type": "uint24"
+			}
+		],
+		"name": "setCompletionLevel",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "taskCounter",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "tasks",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "createdBy",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdOn",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "descriptionInMarkdown",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "funding",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint24",
+				"name": "completionLevel",
+				"type": "uint24"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

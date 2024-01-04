@@ -1,5 +1,9 @@
 /* SPDX-License-Identifier: GNU AFFERO GENERAL PUBLIC LICENSE Version 3
 
+Solve The Tasks You Like. Delegate The Rest. 
+
+The Freedom Enterprise allows for free peer to peer collaboration.
+
 */
 
 pragma solidity 0.8.19;
@@ -11,7 +15,7 @@ interface IFreedomCash {
     function getSellPrice() external  view returns(uint256);
     function buyFreedomCash(uint256 fCAmount, uint256 fCBuyPrice) external payable;
     function sellFreedomCash(uint256 amount, uint256 sellPrice) external;
-  }
+}
 
 contract FreedomEnterprise {
   
@@ -40,24 +44,20 @@ contract FreedomEnterprise {
     Task memory task = Task(msg.sender, block.timestamp, descriptionInMarkdown, fundingAmountFC, 0);
     tasks[taskCounter] = task;
   }
-
   function fundTask(uint256 taskID) public payable {
     if (taskID > taskCounter) { revert TaskIDNotAvailableYet(); }
     tasks[taskID].funding += msg.value;
   }
-
   function setCompletionLevel(uint256 taskID, uint24 completionLevel) public {
     if (tasks[taskID].createdBy != msg.sender) { revert OnlyTheCreatorOfTheTaskCanDoThat(); }
     if(completionLevel > 100) { revert HundredPercentIsEnough(); }
     tasks[taskID].completionLevel = completionLevel;
   }
-
   function reward(address receiver, uint256 taskID, uint256 amount) public payable {
     if (tasks[taskID].createdBy != msg.sender) { revert OnlyTheCreatorOfTheTaskCanDoThat(); }
     if (tasks[taskID].funding < amount) { revert YouCannotRewardWithMoreThanFunding(); }
     claimableRewardsPerTask[receiver][taskID] +=  amount;
   }
-  
   function claimRewards() public payable {
     uint256 totalClaimableRewards = 0;
     for (uint256 i = 1; i <= taskCounter; i++) {
