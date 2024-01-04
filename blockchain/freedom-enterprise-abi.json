@@ -111,6 +111,11 @@
 				"internalType": "uint256",
 				"name": "taskID",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "fundingAmountFC",
+				"type": "uint256"
 			}
 		],
 		"name": "fundTask",

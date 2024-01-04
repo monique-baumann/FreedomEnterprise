@@ -32,15 +32,21 @@ export class FreedomEnterprise {
         const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
         const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10**18))
         const cost = buyPrice * BigInt(fundingAmountFC)
-        this.logger.debug(`creating task. taskCounter before: ${await this.contractFreedomEnterprise.taskCounter()}`)
+        this.logger.debug(`creating task. taskCounter before: ${await this.getTaskCounter()}`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.createTask(descriptionInMarkdown, parsedAmount, { value: cost }))
-        this.logger.debug(`taskCounter after: ${await this.contractFreedomEnterprise.taskCounter()}`)
+        this.logger.debug(`taskCounter after: ${await this.getTaskCounter()}`)
     }
 
     public async fundTask(taskID: number, fundingAmountFC: bigint): Promise<void> {
+        const taskCounter = await this.getTaskCounter()
+        if (taskCounter < taskID) {
+            throw new Error(`is the task ${taskID} already available`)
+        }
         const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
-        this.logger.info(`funding task ${taskID} with amount: ${parsedAmount}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, { value: parsedAmount }))
+        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10**18))
+        const cost = buyPrice * BigInt(fundingAmountFC)
+        this.logger.info(`funding task ${taskID} with amount: ${parsedAmount} FC at price ${buyPrice} paying in total: ${cost} ETH`)
+        await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, parsedAmount, { value: cost }))
     }
 
     public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void>{
@@ -68,6 +74,10 @@ export class FreedomEnterprise {
             funding: raw[3],
             completionLevel: raw[4]
         }
+    }
+    public async getTaskCounter(): Promise<number> {
+        this.logger.info(`reading taskCounter`)
+        return this.contractFreedomEnterprise.taskCounter()
     }
 
     private async awaitTransaction(tx: any): Promise<void> {

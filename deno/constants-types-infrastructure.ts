@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FE = "0xDce7CA348065373D363EB4F6FAcf600E52AAf18f"
+export const FE = "0xdB8042acaEa8d5656aDE8126c250789bfc023639"
 export const FC = "0x1E7A208810366D0562c7Ba93F883daEedBf31410"
 export const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
 export const baseURLScan = "https://zkevm.polygonscan.com/"
