@@ -1,4 +1,4 @@
-# FreedomEnterprise
+# Freedom Enterprise
 I've been working on a new electronic enterprise system that's fully peer-to-peer, with no trusted third party.   
 
 The Freedom Enterprise uses [Freedom Cash](https://FreedomCash.org) ([see scan](https://zkevm.polygonscan.com/token/0xa1e7bB978a28A30B34995c57d5ba0B778E90033B)) as its decentralized currency.  
@@ -10,18 +10,18 @@ The smart contract of the Freedom Enterprise will be completed and deployed toge
 ## Usage Example
 
 ```ts
-
+deno run --allow-all ./usage-example.ts
 ```
 
-## Execute Usage Example Bollinger
+## Execute Usage Example
 
 ```sh
-deno run --allow-read --allow-write ...
+deno run --allow-all ./usage-example.ts
 ```
 
 ## Usage Example Client
-There shall be many trustworthy frontends for Freedom Cash.  
-Programmers will be able to integrate Freedom Cash as svelte, angular or vue component starting on March 2024.
+There shall be many trustworthy frontends for the Freedom Enterprise.  
+Programmers will be able to integrate Freedom Enterprise as svelte, angular or vue component starting on March 2024.
 
 ## Donations
 Thanks to [Freedom Cash](https://FreedomCash.org), we are already free.  
