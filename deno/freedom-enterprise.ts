@@ -59,9 +59,9 @@ export class FreedomEnterprise {
         const parsedAmount = ethers.parseEther(amount.toString())
         await this.awaitTransaction(await this.contractFreedomEnterprise.rewardSomeone(receiver, taskID, parsedAmount))
     }
-    public async getClaimableRewards(receiver: string): Promise<bigint> {
+    public async getClaimableRewardAmountForReceiver(receiver: string): Promise<bigint> {
         this.logger.info(`getting claimable rewards for ${receiver}`)
-        return this.contractFreedomEnterprise.getClaimableRewards(receiver)
+        return this.contractFreedomEnterprise.getClaimableRewardAmountForReceiver(receiver)
     }
 
     public async claimRewards(): Promise<void> {

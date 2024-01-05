@@ -6,6 +6,11 @@
 	},
 	{
 		"inputs": [],
+		"name": "NothingToClaimATM",
+		"type": "error"
+	},
+	{
+		"inputs": [],
 		"name": "OnlyTheCreatorOfTheTaskCanDoThat",
 		"type": "error"
 	},
@@ -23,7 +28,7 @@
 		"inputs": [],
 		"name": "claimRewards",
 		"outputs": [],
-		"stateMutability": "payable",
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -145,25 +150,6 @@
 			}
 		],
 		"name": "getClaimableRewardAmountForReceiver",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "receiver",
-				"type": "address"
-			}
-		],
-		"name": "getClaimableRewards",
 		"outputs": [
 			{
 				"internalType": "uint256",
