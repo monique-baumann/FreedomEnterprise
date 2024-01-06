@@ -7,19 +7,11 @@ The smart contract of the Freedom Enterprise will be completed and deployed toge
 1. [Freedom Cash](https://FreedomCash.org) has at least 9000 holders  
 2. It is March 12th of 2024 in Switzerland
 
-## Usage Example
+## Visitor Stories
 
-```ts
-deno run --allow-all ./usage-example.ts
-```
+... tbc ...
 
-## Execute Usage Example
-
-```sh
-deno run --allow-all ./usage-example.ts
-```
-
-## Usage Example Client
+## Example Clients
 There shall be many trustworthy frontends for the Freedom Enterprise.  
 Programmers will be able to integrate Freedom Enterprise as svelte, angular or vue component starting on March 2024.
 
