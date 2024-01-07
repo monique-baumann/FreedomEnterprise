@@ -49,6 +49,16 @@ export class FreedomEnterprise {
         await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, parsedAmount, { value: cost }))
     }
 
+    public async provideSolution(taskID: number, evidence: string): Promise<void> {
+        this.logger.info(`providing solution for taskID ${taskID}: ${evidence}`)
+        await this.awaitTransaction(await this.contractFreedomEnterprise.provideSolution(taskID, evidence))
+    }
+    
+    public async appreciateSolution(solutionID: number, amount: number) {
+        this.logger.info(`appreciating solution ${solutionID} with: ${amount}`)
+        await this.awaitTransaction(await this.contractFreedomEnterprise.appreciateSolution(solutionID, amount))
+    }
+
     public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void> {
         this.logger.info(`setting completion level for task ${taskID} to: ${completionLevel}`)
         await this.awaitTransaction(await this.contractFreedomEnterprise.setCompletionLevel(taskID, completionLevel))
@@ -59,6 +69,7 @@ export class FreedomEnterprise {
         const parsedAmount = ethers.parseEther(amount.toString())
         await this.awaitTransaction(await this.contractFreedomEnterprise.rewardSomeone(receiver, taskID, parsedAmount))
     }
+
     public async getClaimableRewardAmountForReceiver(receiver: string): Promise<bigint> {
         this.logger.info(`getting claimable rewards for ${receiver}`)
         return this.contractFreedomEnterprise.getClaimableRewardAmountForReceiver(receiver)
@@ -81,6 +92,18 @@ export class FreedomEnterprise {
             timestamp: raw[1],
             descriptionInMarkdown: raw[2],
             completionLevel: raw[3]
+        }
+    }
+    public async getSolution(solutionID: number) {
+        this.logger.info(`reading solution ${solutionID}`)
+        const raw = await this.contractFreedomEnterprise.solutions(solutionID)
+        
+        this.logger.info(`${raw}`)
+        return {
+            from: raw[0],
+            evidence: raw[1],
+            score: raw[2],
+            timestamp: raw[3]
         }
     }
     public async getFunding(fundingID: number): Promise<ITask> {
@@ -114,10 +137,14 @@ export class FreedomEnterprise {
         this.logger.info(`reading fundingCounter`)
         return this.contractFreedomEnterprise.fundingCounter()
     }
-    public async getRewardCounter(): Promise<number> {
-        this.logger.info(`reading rewardCounter`)
-        return this.contractFreedomEnterprise.rewardCounter()
+    public async getSolutionCounter(): Promise<number> {
+        this.logger.info(`reading solutionCounter`)
+        return this.contractFreedomEnterprise.solutionCounter()
     }
+    // public async getRewardCounter(): Promise<number> {
+    //     this.logger.info(`reading rewardCounter`)
+    //     return this.contractFreedomEnterprise.rewardCounter()
+    // }
     private async awaitTransaction(tx: any): Promise<void> {
         this.logger.info(`transaction ${baseURLScan}tx/${tx.hash}`)
         await tx.wait()

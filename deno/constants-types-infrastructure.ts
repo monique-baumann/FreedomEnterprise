@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FE = "0x06BC0caA077ecC4665BB9B343f5Fb306EC874a28"
+export const FE = "0x1B65Cc24894e64E11687eaF175cF7aAfe6d4837d"
 export const FC = "0x1E7A208810366D0562c7Ba93F883daEedBf31410"
 export const VITALIK = "0xB257CCE82d58Ed21c70B4B0cac6a6089408E5dbE" // temp :)
 // export const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
@@ -18,11 +18,11 @@ export interface IFunding {
     amount: bigint
     timestamp: number
 }
-export interface IReward {
-    to: string
-    amount: bigint
+export interface ISolution {
+    from: string
+    evidence: string
+    score: bigint
     timestamp: number
-    claimed: boolean
 }
 
 export function getProvider(logger: Logger) {
