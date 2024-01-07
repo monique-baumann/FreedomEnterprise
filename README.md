@@ -13,7 +13,7 @@ The smart contract of the Freedom Enterprise will be completed and deployed toge
 
 ## Example Clients
 There shall be many trustworthy frontends for the Freedom Enterprise.  
-Programmers will be able to integrate Freedom Enterprise as svelte, angular or vue component starting on March 2024.
+Programmers will be able to integrate the Freedom Enterprise as svelte, angular or vue component starting on March 2024.
 
 ## Donations
 Thanks to [Freedom Cash](https://FreedomCash.org), we are already free.  

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GNU AFFERO GENERAL PUBLIC LICENSE Version 3
+
 // Solve The Tasks You Like. Delegate The Rest. 
 // The Freedom Enterprise is an enterprise system that's fully peer-to-peer, with no trusted third party.
 // The Freedom Enterprise uses Freedom Cash as its decentralized currency
@@ -15,6 +16,7 @@ contract FreedomEnterprise {
   uint256 public taskCounter = 0;
   uint256 public fundingCounter = 0;
   uint256 public rewardCounter = 0;
+  uint256 public solutionsCounter = 0;
   mapping(uint256 => Task) public tasks;
   struct Task {
     address createdBy;
@@ -28,22 +30,24 @@ contract FreedomEnterprise {
     uint256 amount;
     uint256 timestamp;
   }
-  mapping(uint256 => Reward) public rewards;
-  struct Reward {
-    address to;
-    uint256 amount;
+  mapping(uint256 => Solution) public solutions;
+  struct Solution{
+    address from;    
+    string evidence;
+    uint256 score;
     uint256 timestamp;
-    bool claimed;
-  }
+  }  
   mapping(uint256 => uint256) public fundingsToTask;
-  mapping(uint256 => uint256) public rewardsToTask;
+  mapping(uint256 => uint256) public solutionsToTask;  
+
   address public freedomCashSmartContract = 0x1E7A208810366D0562c7Ba93F883daEedBf31410;
 
   error TaskIDNotAvailableYet();
   error OnlyTheCreatorOfTheTaskCanDoThat();  
-  error YouCannotRewardWithMoreThanFunding();
   error NothingToClaimATM();
   error HundredPercentIsEnough();
+  error yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask();
+  error strangeErrorCanProbablyBeDeleted();
   
   function createTask(string memory descriptionInMarkdown, uint256 fundingAmountFC) public payable {
     taskCounter++;
@@ -64,23 +68,46 @@ contract FreedomEnterprise {
     fundings[fundingCounter] = funding;
     fundingsToTask[fundingCounter] = taskID;
   }
-  function rewardSomeone(address receiver, uint256 taskID, uint256 amount) public payable {
-    if (tasks[taskID].createdBy != msg.sender) { revert OnlyTheCreatorOfTheTaskCanDoThat(); }
-    if (getFundingAmountOf(taskID) < amount) { revert YouCannotRewardWithMoreThanFunding(); }
-    rewardCounter++;
-    Reward memory reward = Reward(receiver, amount, block.timestamp, false);
-    rewards[rewardCounter] = reward;
-    rewardsToTask[rewardCounter] = taskID;
+  function provideSolution(uint256 taskID, string memory evidence) public {
+    solutionsCounter++;
+    Solution memory solution = Solution(msg.sender, evidence, 0, block.timestamp);
+    solutions[solutionsCounter] = solution;
+    solutionsToTask[solutionsCounter] = taskID;    
+  }
+  function appreciateSolution(uint256 solutionID, uint256 amount) public payable {
+    uint256 taskID = solutionsToTask[solutionID];
+    uint256 collected = updateFundingsDueToAppreciation(taskID, amount);
+    if (amount == collected) {
+      solutions[solutionID].score += amount;
+    } else if (amount < collected) {
+      revert strangeErrorCanProbablyBeDeleted();
+    } else {
+      revert yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask();
+    }
+  }
+  function updateFundingsDueToAppreciation(uint256 taskID, uint256 amount) internal returns(uint256) {
+    uint256 collected = 0;
+    for (uint256 i = 1; i <= fundingCounter; i++) {
+      if (fundingsToTask[i] == taskID && fundings[i].from == msg.sender){
+        uint256 missing = amount - collected;
+        if (missing > 0){
+          collected += fundings[i].amount;
+          if(collected > missing) {
+            fundings[i].amount = fundings[i].amount + (collected - missing);
+            collected = amount;
+          }
+        }
+      }
+    }
+    return collected;
   }
   function claimRewards() public {
-    uint256 totalClaimableRewards = getClaimableRewardAmountForReceiver(msg.sender);
-    if (totalClaimableRewards == 0) { revert NothingToClaimATM(); }
-    IERC20(freedomCashSmartContract).transfer(msg.sender, totalClaimableRewards);
-    for (uint256 i = 1; i <= rewardCounter; i++) {
-      if(rewards[i].to == msg.sender) {
-        rewards[i].claimed = true;
-      }
-    }     
+    uint256 claimable = getClaimableReward(msg.sender);
+    if (claimable > 0) {
+      IERC20(freedomCashSmartContract).transfer(msg.sender, claimable);
+    } else {
+      revert NothingToClaimATM();
+    }
   }  
   function setCompletionLevel(uint256 taskID, uint24 completionLevel) public {
     if (tasks[taskID].createdBy != msg.sender) { revert OnlyTheCreatorOfTheTaskCanDoThat(); }
@@ -96,13 +123,13 @@ contract FreedomEnterprise {
     }
     return total;
   }
-  function getClaimableRewardAmountForReceiver(address receiver) public view returns(uint256){
-    uint256 total = 0;
-    for (uint256 i = 1; i <= rewardCounter; i++) {
-      if (rewards[i].to == receiver && rewards[i].claimed == false){
-        total += rewards[i].amount;
+  function getClaimableReward(address receiver) public view returns(uint256){
+    uint256 claimable = 0;
+    for (uint256 i = 1; i <= solutionsCounter; i++) {
+      if (solutions[i].from == receiver && solutions[i].score > 0){
+        claimable += solutions[i].score;
       }
     }
-    return total;
+    return claimable;
   }  
 }
