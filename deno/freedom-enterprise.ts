@@ -105,7 +105,7 @@ export class FreedomEnterprise {
         const funding1 = await this.getFunding(1)
         this.logger.debug(`funding 1: ${funding1.from} ${funding1.amount} ${funding1.assignedAmount} ${funding1.timestamp}`)
         const solution1 = await this.getSolution(1)
-        this.logger.debug(`solution 1: ${solution1.from} ${solution1.evidence} ${solution1.score} ${solution1.timestamp}`)
+        this.logger.debug(`solution 1: ${solution1.from} ${solution1.evidence} ${solution1.score} ${solution1.claimed} ${solution1.timestamp}`)
     }
 
     public async getMaxAppreciationPotential(taskID: number, supporter: string) {
@@ -148,7 +148,8 @@ export class FreedomEnterprise {
             from: raw[0],
             evidence: raw[1],
             score: raw[2],
-            timestamp: raw[3]
+            claimed: raw[3],
+            timestamp: raw[4]
         }
     }
 

@@ -36,6 +36,7 @@ contract FreedomEnterprise {
     address from;    
     string evidence;
     uint256 score;
+    uint256 claimed;
     uint256 timestamp;
   }  
   mapping(uint256 => uint256) public fundingsToTask;
@@ -73,7 +74,7 @@ contract FreedomEnterprise {
   }
   function provideSolution(uint256 taskID, string memory evidence) public {
     solutionCounter++;
-    Solution memory solution = Solution(msg.sender, evidence, 0, block.timestamp);
+    Solution memory solution = Solution(msg.sender, evidence, 0, 0, block.timestamp);
     solutions[solutionCounter] = solution;
     solutionsToTask[solutionCounter] = taskID;    
   }
@@ -81,7 +82,7 @@ contract FreedomEnterprise {
     uint256 maxAppreciationPotential = 0;
       for (uint256 i = 1; i <= fundingCounter; i++) {
         if (fundingsToTask[i] == taskID && fundings[i].from == supporter){
-          maxAppreciationPotential += fundings[i].amount - fundings[i].assignedAmount;
+          maxAppreciationPotential += (fundings[i].amount - fundings[i].assignedAmount);
         }
       }
 
@@ -109,11 +110,17 @@ contract FreedomEnterprise {
           } 
       }
     }    
+    solutions[solutionID].score += amount;
 
   }
   function claimRewards() public {
     uint256 claimable = getClaimableReward(msg.sender);
     if (claimable > 0) {
+      for (uint256 i = 1; i <= solutionCounter; i++) {
+       if (solutions[i].from == msg.sender && solutions[i].score > 0){
+        solutions[i].claimed = solutions[i].score;
+        }
+      }      
       IERC20(freedomCashSmartContract).transfer(msg.sender, claimable);
     } else {
       revert NothingToClaimATM();
@@ -137,7 +144,7 @@ contract FreedomEnterprise {
     uint256 claimable = 0;
     for (uint256 i = 1; i <= solutionCounter; i++) {
       if (solutions[i].from == receiver && solutions[i].score > 0){
-        claimable += solutions[i].score;
+        claimable += (solutions[i].score - solutions[i].claimed);
       }
     }
     return claimable;
