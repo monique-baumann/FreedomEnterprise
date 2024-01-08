@@ -9,10 +9,8 @@ const amount = 9
 const completionLevel = 100
 const receiver = VITALIK
 
-await freedomEnterprise.logWhatsUp()
-
 // await freedomEnterprise.createTask(descriptionInMarkdown, amount) 
-// const taskCounter = await freedomEnterprise.getTaskCounter()
+const taskCounter = await freedomEnterprise.getTaskCounter()
 // console.log(await freedomEnterprise.getTask(taskCounter))
 
 // await freedomEnterprise.fundTask(taskCounter, amount) 
@@ -20,11 +18,12 @@ await freedomEnterprise.logWhatsUp()
 // console.log(await freedomEnterprise.getFunding(fundingCounter))
 
 // await freedomEnterprise.provideSolution(taskCounter, evidence) 
-// const solutionCounter = await freedomEnterprise.getSolutionCounter()
+const solutionCounter = await freedomEnterprise.getSolutionCounter()
 // console.log(await freedomEnterprise.getSolution(solutionCounter))
-
-// await freedomEnterprise.appreciateSolution(solutionCounter, amount) 
-// console.log(await freedomEnterprise.getSolution(solutionCounter))
+const max = await freedomEnterprise.getMaxAppreciationPotential(taskCounter, "0xB257CCE82d58Ed21c70B4B0cac6a6089408E5dbE")
+console.log(max)
+await freedomEnterprise.appreciateSolution(solutionCounter, 4) 
+console.log(await freedomEnterprise.getSolution(solutionCounter))
 
 // let claimableRewards = await freedomEnterprise.getClaimableReward(receiver)
 // console.log(claimableRewards)
@@ -35,3 +34,4 @@ await freedomEnterprise.logWhatsUp()
 // await freedomEnterprise.setCompletionLevel(taskCounter, completionLevel) 
 // console.log(await freedomEnterprise.getTask(taskCounter))
 
+await freedomEnterprise.logWhatsUp()

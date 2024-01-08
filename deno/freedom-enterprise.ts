@@ -99,12 +99,18 @@ export class FreedomEnterprise {
         this.logger.debug(`task counter: ${await this.getTaskCounter()}`)
         this.logger.debug(`funding counter: ${await this.getFundingCounter()}`)
         this.logger.debug(`solution counter ${await this.getSolutionCounter()}`)
-        this.logger.debug(`claimable reward ${await this.getClaimableReward("0x7A915e362353d72570dcf90aa5BAA1C5B341c7AA")}`)
-        this.logger.debug(`task 1: ${await this.getTask(1)}`)
-        this.logger.debug(`solution 1: ${await this.getSolution(1)}`)
-        this.logger.debug(`funding 1: ${await this.getFunding(1)}`)
-        this.logger.debug(`funding 2: ${await this.getFunding(2)}`)
-        this.logger.debug(`funding 3: ${await this.getFunding(3)}`)
+        this.logger.debug(`claimable reward ${await this.getClaimableReward("0xB257CCE82d58Ed21c70B4B0cac6a6089408E5dbE")}`)
+        const task1 = await this.getTask(1)
+        this.logger.debug(`task 1: ${task1.createdBy} ${task1.timestamp} ${task1.descriptionInMarkdown} ${task1.completionLevel}`)
+        const funding1 = await this.getFunding(1)
+        this.logger.debug(`funding 1: ${funding1.from} ${funding1.amount} ${funding1.assignedAmount} ${funding1.timestamp}`)
+        const solution1 = await this.getSolution(1)
+        this.logger.debug(`solution 1: ${solution1.from} ${solution1.evidence} ${solution1.score} ${solution1.timestamp}`)
+    }
+
+    public async getMaxAppreciationPotential(taskID: number, supporter: string) {
+        this.logger.info(`getting maximum appreciation potential for task ${taskID} by supporter ${supporter}`)
+        return this.contractFreedomEnterprise.getMaxAppreciationPotential(taskID, supporter)
     }
 
     public async getClaimableReward(receiver: string): Promise<bigint> {
@@ -115,7 +121,6 @@ export class FreedomEnterprise {
     public async getTask(taskID: number): Promise<ITask> {
         this.logger.info(`reading task ${taskID}`)
         const raw = await this.contractFreedomEnterprise.tasks(taskID)
-        this.logger.info(`${raw}`)
 
         return {
             createdBy: raw[0],
@@ -124,22 +129,9 @@ export class FreedomEnterprise {
             completionLevel: raw[3]
         }
     }
-    public async getSolution(solutionID: number) {
-        this.logger.info(`reading solution ${solutionID}`)
-        const raw = await this.contractFreedomEnterprise.solutions(solutionID)
-
-        this.logger.info(`${raw}`)
-        return {
-            from: raw[0],
-            evidence: raw[1],
-            score: raw[2],
-            timestamp: raw[3]
-        }
-    }
-    public async getFunding(fundingID: number): Promise<ITask> {
+    public async getFunding(fundingID: number): Promise<IFunding> {
         this.logger.info(`reading funding ${fundingID}`)
         const raw = await this.contractFreedomEnterprise.fundings(fundingID)
-        this.logger.info(`${raw}`)
 
         return {
             from: raw[0],
@@ -147,7 +139,19 @@ export class FreedomEnterprise {
             assignedAmount: raw[2],
             timestamp: raw[3]
         }
+    }    
+    public async getSolution(solutionID: number) {
+        this.logger.info(`reading solution ${solutionID}`)
+        const raw = await this.contractFreedomEnterprise.solutions(solutionID)
+
+        return {
+            from: raw[0],
+            evidence: raw[1],
+            score: raw[2],
+            timestamp: raw[3]
+        }
     }
+
     public async getTaskCounter(): Promise<number> {
         this.logger.info(`reading taskCounter`)
         return this.contractFreedomEnterprise.taskCounter()
