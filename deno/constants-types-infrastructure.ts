@@ -1,6 +1,6 @@
 import { ethers, Logger } from "../deps.ts"
 
-export const FE = "0x1B65Cc24894e64E11687eaF175cF7aAfe6d4837d"
+export const FE = "0x2230Ec4f0E8b6fEE94cc532E5C14D3BfAC49eff3"
 export const FC = "0x1E7A208810366D0562c7Ba93F883daEedBf31410"
 export const VITALIK = "0xB257CCE82d58Ed21c70B4B0cac6a6089408E5dbE" // temp :)
 // export const VITALIK = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"

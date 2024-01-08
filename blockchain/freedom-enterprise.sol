@@ -16,7 +16,7 @@ contract FreedomEnterprise {
   uint256 public taskCounter = 0;
   uint256 public fundingCounter = 0;
   uint256 public rewardCounter = 0;
-  uint256 public solutionsCounter = 0;
+  uint256 public solutionCounter = 0;
   mapping(uint256 => Task) public tasks;
   struct Task {
     address createdBy;
@@ -40,7 +40,7 @@ contract FreedomEnterprise {
   mapping(uint256 => uint256) public fundingsToTask;
   mapping(uint256 => uint256) public solutionsToTask;  
 
-  address public freedomCashSmartContract = 0x1E7A208810366D0562c7Ba93F883daEedBf31410;
+  address public freedomCashSmartContract = 0x1E7A208810366D0562c7Ba93F883daEedBf31410; // testnet
 
   error TaskIDNotAvailableYet();
   error OnlyTheCreatorOfTheTaskCanDoThat();  
@@ -48,10 +48,12 @@ contract FreedomEnterprise {
   error HundredPercentIsEnough();
   error yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask();
   error strangeErrorCanProbablyBeDeleted();
-  
-  function createTask(string memory descriptionInMarkdown, uint256 fundingAmountFC) public payable {
+  error BuyPriceMightHaveRisen(); 
+
+  function createTask(string memory descriptionInMarkdown, uint256 fundingAmountFC, uint256 fCBuyPrice) public payable {
     taskCounter++;
-    uint256 fCBuyPrice = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
+    uint256 fCBuyPriceCheck = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
+    if (fCBuyPriceCheck != fCBuyPrice) { revert BuyPriceMightHaveRisen(); }    
     IFreedomCash(freedomCashSmartContract).buyFreedomCash{value: msg.value}(fundingAmountFC, fCBuyPrice);
     Task memory task = Task(msg.sender, block.timestamp, descriptionInMarkdown, 0);
     tasks[taskCounter] = task;
@@ -59,20 +61,21 @@ contract FreedomEnterprise {
     fundings[fundingCounter] = funding;
     fundingsToTask[fundingCounter] = taskCounter;
   }
-  function fundTask(uint256 taskID, uint256 fundingAmountFC) public payable {
+  function fundTask(uint256 taskID, uint256 fundingAmountFC, uint256 fCBuyPrice) public payable {
     if (taskID > taskCounter) { revert TaskIDNotAvailableYet(); }
     fundingCounter++;
-    uint256 fCBuyPrice = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
+    uint256 fCBuyPriceCheck = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
+    if (fCBuyPriceCheck != fCBuyPrice) { revert BuyPriceMightHaveRisen(); }
     IFreedomCash(freedomCashSmartContract).buyFreedomCash{value: msg.value}(fundingAmountFC, fCBuyPrice);
     Funding memory funding = Funding(msg.sender, fundingAmountFC, block.timestamp);
     fundings[fundingCounter] = funding;
     fundingsToTask[fundingCounter] = taskID;
   }
   function provideSolution(uint256 taskID, string memory evidence) public {
-    solutionsCounter++;
+    solutionCounter++;
     Solution memory solution = Solution(msg.sender, evidence, 0, block.timestamp);
-    solutions[solutionsCounter] = solution;
-    solutionsToTask[solutionsCounter] = taskID;    
+    solutions[solutionCounter] = solution;
+    solutionsToTask[solutionCounter] = taskID;    
   }
   function appreciateSolution(uint256 solutionID, uint256 amount) public payable {
     uint256 taskID = solutionsToTask[solutionID];
@@ -125,7 +128,7 @@ contract FreedomEnterprise {
   }
   function getClaimableReward(address receiver) public view returns(uint256){
     uint256 claimable = 0;
-    for (uint256 i = 1; i <= solutionsCounter; i++) {
+    for (uint256 i = 1; i <= solutionCounter; i++) {
       if (solutions[i].from == receiver && solutions[i].score > 0){
         claimable += solutions[i].score;
       }

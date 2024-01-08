@@ -1,5 +1,5 @@
 import { ethers, Logger } from "../deps.ts"
-import { ITask, IFunding, IReward, getLogger, getProvider, getContract, FE, FC, baseURLScan } from "./constants-types-infrastructure.ts"
+import { ITask, IFunding, getLogger, getProvider, getContract, FE, FC, baseURLScan } from "./constants-types-infrastructure.ts"
 
 export class FreedomEnterprise {
 
@@ -29,12 +29,17 @@ export class FreedomEnterprise {
     }
 
     public async createTask(descriptionInMarkdown: string, fundingAmountFC: number): Promise<void> {
-        const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
-        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
-        const cost = buyPrice * BigInt(fundingAmountFC)
-        this.logger.debug(`creating task. taskCounter before: ${await this.getTaskCounter()}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.createTask(descriptionInMarkdown, parsedAmount, { value: cost }))
-        this.logger.debug(`taskCounter after: ${await this.getTaskCounter()}`)
+        try {
+            const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
+            const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
+            const cost = buyPrice * BigInt(fundingAmountFC)
+            this.logger.debug(`creating task. taskCounter before: ${await this.getTaskCounter()}`)
+            const tx = await this.contractFreedomEnterprise.createTask(descriptionInMarkdown, parsedAmount, buyPrice, { value: cost })
+            await this.awaitTransaction(tx)
+            this.logger.debug(`taskCounter after: ${await this.getTaskCounter()}`)
+        } catch (error) {
+            this.logger.error(error)
+        }
     }
 
     public async fundTask(taskID: number, fundingAmountFC: bigint): Promise<void> {
@@ -42,37 +47,48 @@ export class FreedomEnterprise {
         if (taskCounter < taskID) {
             throw new Error(`is the task ${taskID} already available`)
         }
-        const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
-        const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
-        const cost = buyPrice * BigInt(fundingAmountFC)
-        this.logger.info(`funding task ${taskID} with amount: ${parsedAmount} FC at price ${buyPrice} paying in total: ${cost} ETH`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, parsedAmount, { value: cost }))
+        try {
+            const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
+            const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
+            const cost = buyPrice * BigInt(fundingAmountFC)
+            this.logger.info(`funding task ${taskID} with amount: ${parsedAmount} FC at price ${buyPrice} paying in total: ${cost} ETH`)
+            await this.awaitTransaction(await this.contractFreedomEnterprise.fundTask(taskID, parsedAmount, buyPrice, { value: cost }))
+        } catch (error) {
+            this.logger.error(error)
+        }
     }
 
     public async provideSolution(taskID: number, evidence: string): Promise<void> {
         this.logger.info(`providing solution for taskID ${taskID}: ${evidence}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.provideSolution(taskID, evidence))
+        try {
+            await this.awaitTransaction(await this.contractFreedomEnterprise.provideSolution(taskID, evidence))
+        } catch (error) {
+            this.logger.error(error)
+        }
     }
-    
+
     public async appreciateSolution(solutionID: number, amount: number) {
-        this.logger.info(`appreciating solution ${solutionID} with: ${amount}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.appreciateSolution(solutionID, amount))
+        try {
+            const parsedAmount = ethers.parseEther(amount.toString())
+            this.logger.info(`appreciating solution ${solutionID} with: ${parsedAmount}`)
+            await this.awaitTransaction(await this.contractFreedomEnterprise.appreciateSolution(solutionID, parsedAmount))
+        } catch (error) {
+            this.logger.error(error)
+        }
     }
 
     public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void> {
         this.logger.info(`setting completion level for task ${taskID} to: ${completionLevel}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.setCompletionLevel(taskID, completionLevel))
+        try {
+            await this.awaitTransaction(await this.contractFreedomEnterprise.setCompletionLevel(taskID, completionLevel))
+        } catch (error) {
+            this.logger.error(error)
+        }
     }
 
-    public async rewardSomeone(receiver: string, taskID: number, amount: number): Promise<void> {
-        this.logger.info(`assigning ${amount} Freedom Cash as reward for task ${taskID} to receiver: ${receiver}`)
-        const parsedAmount = ethers.parseEther(amount.toString())
-        await this.awaitTransaction(await this.contractFreedomEnterprise.rewardSomeone(receiver, taskID, parsedAmount))
-    }
-
-    public async getClaimableRewardAmountForReceiver(receiver: string): Promise<bigint> {
+    public async getClaimableReward(receiver: string): Promise<bigint> {
         this.logger.info(`getting claimable rewards for ${receiver}`)
-        return this.contractFreedomEnterprise.getClaimableRewardAmountForReceiver(receiver)
+        return this.contractFreedomEnterprise.getClaimableReward(receiver)
     }
 
     public async claimRewards(): Promise<void> {
@@ -97,7 +113,7 @@ export class FreedomEnterprise {
     public async getSolution(solutionID: number) {
         this.logger.info(`reading solution ${solutionID}`)
         const raw = await this.contractFreedomEnterprise.solutions(solutionID)
-        
+
         this.logger.info(`${raw}`)
         return {
             from: raw[0],
@@ -141,10 +157,6 @@ export class FreedomEnterprise {
         this.logger.info(`reading solutionCounter`)
         return this.contractFreedomEnterprise.solutionCounter()
     }
-    // public async getRewardCounter(): Promise<number> {
-    //     this.logger.info(`reading rewardCounter`)
-    //     return this.contractFreedomEnterprise.rewardCounter()
-    // }
     private async awaitTransaction(tx: any): Promise<void> {
         this.logger.info(`transaction ${baseURLScan}tx/${tx.hash}`)
         await tx.wait()
