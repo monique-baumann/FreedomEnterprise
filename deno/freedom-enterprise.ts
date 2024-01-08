@@ -45,10 +45,6 @@ export class FreedomEnterprise {
     }
 
     public async fundTask(taskID: number, fundingAmountFC: bigint): Promise<void> {
-        const taskCounter = await this.getTaskCounter()
-        if (taskCounter < taskID) {
-            throw new Error(`is the task ${taskID} already available`)
-        }
         try {
             const parsedAmount = ethers.parseEther(fundingAmountFC.toString())
             const buyPrice = await this.contractFreedomCash.getBuyPrice(BigInt(10 ** 18))
@@ -86,24 +82,17 @@ export class FreedomEnterprise {
         this.logger.info(`fc balance in smart contract after : ${await this.contractFreedomCash.balanceOf(FE)}`)
     }
 
-    public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void> {
-        this.logger.info(`setting completion level for task ${taskID} to: ${completionLevel}`)
-        try {
-            await this.awaitTransaction(await this.contractFreedomEnterprise.setCompletionLevel(taskID, completionLevel))
-        } catch (error) {
-            this.logger.error(error)
-        }
-    }
-
     public async logWhatsUp() {
         this.logger.debug(`task counter: ${await this.getTaskCounter()}`)
         this.logger.debug(`funding counter: ${await this.getFundingCounter()}`)
         this.logger.debug(`solution counter ${await this.getSolutionCounter()}`)
         this.logger.debug(`claimable reward ${await this.getClaimableReward("0xB257CCE82d58Ed21c70B4B0cac6a6089408E5dbE")}`)
         const task1 = await this.getTask(1)
-        this.logger.debug(`task 1: ${task1.createdBy} ${task1.timestamp} ${task1.descriptionInMarkdown} ${task1.completionLevel}`)
+        this.logger.debug(`task 1: ${task1.createdBy} ${task1.timestamp} ${task1.descriptionInMarkdown}`)
         const funding1 = await this.getFunding(1)
         this.logger.debug(`funding 1: ${funding1.from} ${funding1.amount} ${funding1.assignedAmount} ${funding1.timestamp}`)
+        const funding2 = await this.getFunding(2)
+        this.logger.debug(`funding 2: ${funding2.from} ${funding2.amount} ${funding2.assignedAmount} ${funding2.timestamp}`)
         const solution1 = await this.getSolution(1)
         this.logger.debug(`solution 1: ${solution1.from} ${solution1.evidence} ${solution1.score} ${solution1.claimed} ${solution1.timestamp}`)
     }
@@ -125,8 +114,7 @@ export class FreedomEnterprise {
         return {
             createdBy: raw[0],
             timestamp: raw[1],
-            descriptionInMarkdown: raw[2],
-            completionLevel: raw[3]
+            descriptionInMarkdown: raw[2]
         }
     }
     public async getFunding(fundingID: number): Promise<IFunding> {

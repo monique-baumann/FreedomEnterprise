@@ -22,7 +22,6 @@ contract FreedomEnterprise {
     address createdBy;
     uint256 timestamp;
     string descriptionInMarkdown;
-    uint24 completionLevel;
   }
   mapping(uint256 => Funding) public fundings;
   struct Funding{
@@ -56,7 +55,7 @@ contract FreedomEnterprise {
     uint256 fCBuyPriceCheck = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
     if (fCBuyPriceCheck != fCBuyPrice) { revert BuyPriceMightHaveRisen(); }    
     IFreedomCash(freedomCashSmartContract).buyFreedomCash{value: msg.value}(fundingAmountFC, fCBuyPrice);
-    Task memory task = Task(msg.sender, block.timestamp, descriptionInMarkdown, 0);
+    Task memory task = Task(msg.sender, block.timestamp, descriptionInMarkdown);
     tasks[taskCounter] = task;
     Funding memory funding = Funding(msg.sender, fundingAmountFC, 0, block.timestamp);
     fundings[fundingCounter] = funding;
@@ -126,11 +125,6 @@ contract FreedomEnterprise {
       revert NothingToClaimATM();
     }
   }  
-  function setCompletionLevel(uint256 taskID, uint24 completionLevel) public {
-    if (tasks[taskID].createdBy != msg.sender) { revert OnlyTheCreatorOfTheTaskCanDoThat(); }
-    if(completionLevel > 100) { revert HundredPercentIsEnough(); }
-    tasks[taskID].completionLevel = completionLevel;
-  }
   function getFundingAmountOf(uint256 taskID) public view returns(uint256){
     uint256 total = 0;
     for (uint256 i = 1; i <= fundingCounter; i++) {

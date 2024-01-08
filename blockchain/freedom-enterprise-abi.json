@@ -273,24 +273,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "taskID",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint24",
-				"name": "completionLevel",
-				"type": "uint24"
-			}
-		],
-		"name": "setCompletionLevel",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [],
 		"name": "solutionCounter",
 		"outputs": [
@@ -398,11 +380,6 @@
 				"internalType": "string",
 				"name": "descriptionInMarkdown",
 				"type": "string"
-			},
-			{
-				"internalType": "uint24",
-				"name": "completionLevel",
-				"type": "uint24"
 			}
 		],
 		"stateMutability": "view",
