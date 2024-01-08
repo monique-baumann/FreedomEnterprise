@@ -26,12 +26,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "strangeErrorCanProbablyBeDeleted",
-		"type": "error"
-	},
-	{
-		"inputs": [],
-		"name": "yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask",
+		"name": "yourAppreciationAmountCannotBeHigherThanYourFundingsForThisTask",
 		"type": "error"
 	},
 	{
@@ -153,6 +148,11 @@
 			},
 			{
 				"internalType": "uint256",
+				"name": "assignedAmount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
 			}
@@ -207,6 +207,30 @@
 			}
 		],
 		"name": "getFundingAmountOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "taskID",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "supporter",
+				"type": "address"
+			}
+		],
+		"name": "getMaxAppreciationPotential",
 		"outputs": [
 			{
 				"internalType": "uint256",

@@ -28,6 +28,7 @@ contract FreedomEnterprise {
   struct Funding{
     address from;    
     uint256 amount;
+    uint256 assignedAmount;
     uint256 timestamp;
   }
   mapping(uint256 => Solution) public solutions;
@@ -46,8 +47,7 @@ contract FreedomEnterprise {
   error OnlyTheCreatorOfTheTaskCanDoThat();  
   error NothingToClaimATM();
   error HundredPercentIsEnough();
-  error yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask();
-  error strangeErrorCanProbablyBeDeleted();
+  error yourAppreciationAmountCannotBeHigherThanYourFundingsForThisTask();
   error BuyPriceMightHaveRisen(); 
 
   function createTask(string memory descriptionInMarkdown, uint256 fundingAmountFC, uint256 fCBuyPrice) public payable {
@@ -57,7 +57,7 @@ contract FreedomEnterprise {
     IFreedomCash(freedomCashSmartContract).buyFreedomCash{value: msg.value}(fundingAmountFC, fCBuyPrice);
     Task memory task = Task(msg.sender, block.timestamp, descriptionInMarkdown, 0);
     tasks[taskCounter] = task;
-    Funding memory funding = Funding(msg.sender, fundingAmountFC, block.timestamp);
+    Funding memory funding = Funding(msg.sender, fundingAmountFC, 0, block.timestamp);
     fundings[fundingCounter] = funding;
     fundingsToTask[fundingCounter] = taskCounter;
   }
@@ -67,7 +67,7 @@ contract FreedomEnterprise {
     uint256 fCBuyPriceCheck = IFreedomCash(freedomCashSmartContract).getBuyPrice(10**18);
     if (fCBuyPriceCheck != fCBuyPrice) { revert BuyPriceMightHaveRisen(); }
     IFreedomCash(freedomCashSmartContract).buyFreedomCash{value: msg.value}(fundingAmountFC, fCBuyPrice);
-    Funding memory funding = Funding(msg.sender, fundingAmountFC, block.timestamp);
+    Funding memory funding = Funding(msg.sender, fundingAmountFC, 0, block.timestamp);
     fundings[fundingCounter] = funding;
     fundingsToTask[fundingCounter] = taskID;
   }
@@ -77,32 +77,39 @@ contract FreedomEnterprise {
     solutions[solutionCounter] = solution;
     solutionsToTask[solutionCounter] = taskID;    
   }
-  function appreciateSolution(uint256 solutionID, uint256 amount) public payable {
-    uint256 taskID = solutionsToTask[solutionID];
-    uint256 collected = updateFundingsDueToAppreciation(taskID, amount);
-    if (amount == collected) {
-      solutions[solutionID].score += amount;
-    } else if (amount < collected) {
-      revert strangeErrorCanProbablyBeDeleted();
-    } else {
-      revert yourAppreciationAmountCannotBeHigherThanYourFundingForThisTask();
-    }
-  }
-  function updateFundingsDueToAppreciation(uint256 taskID, uint256 amount) internal returns(uint256) {
-    uint256 collected = 0;
-    for (uint256 i = 1; i <= fundingCounter; i++) {
-      if (fundingsToTask[i] == taskID && fundings[i].from == msg.sender){
-        uint256 missing = amount - collected;
-        if (missing > 0){
-          collected += fundings[i].amount;
-          if(collected > missing) {
-            fundings[i].amount = fundings[i].amount + (collected - missing);
-            collected = amount;
-          }
+  function getMaxAppreciationPotential(uint256 taskID, address supporter) public view returns(uint256) {
+    uint256 maxAppreciationPotential = 0;
+      for (uint256 i = 1; i <= fundingCounter; i++) {
+        if (fundingsToTask[i] == taskID && fundings[i].from == supporter){
+          maxAppreciationPotential += fundings[i].amount - fundings[i].assignedAmount;
         }
       }
-    }
-    return collected;
+
+      return maxAppreciationPotential;
+  }
+  function appreciateSolution(uint256 solutionID, uint256 amount) public payable {
+    uint256 taskID = solutionsToTask[solutionID];
+    if (amount > getMaxAppreciationPotential(taskID, msg.sender)) {
+      revert yourAppreciationAmountCannotBeHigherThanYourFundingsForThisTask();
+    }    
+    uint256 appreciationPot = 0;
+    for (uint256 i = 1; i <= fundingCounter; i++) {
+      if (fundingsToTask[i] == taskID && fundings[i].from == msg.sender){
+          if (appreciationPot < amount) {
+            uint256 diff = amount - appreciationPot;
+            uint256 assignable = fundings[i].amount - fundings[i].assignedAmount;
+            uint256 toBeAssigned = 0;
+            if (diff > assignable){
+              toBeAssigned = assignable;
+            } else {
+              toBeAssigned = diff;
+            }
+            appreciationPot += toBeAssigned;
+            fundings[i].assignedAmount += toBeAssigned;
+          } 
+      }
+    }    
+
   }
   function claimRewards() public {
     uint256 claimable = getClaimableReward(msg.sender);

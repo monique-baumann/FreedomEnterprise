@@ -14,16 +14,18 @@ export class FreedomEnterprise {
             if (currency !== FC) {
                 throw new Error(`check Freedom Cash ${FC} resp. ${currency}`)
             }
-            return new FreedomEnterprise(logger, contractFreedomEnterprise, contractFreedomCash)
+            return new FreedomEnterprise(logger, contractFreedomEnterprise, contractFreedomCash, provider)
         }
     }
 
     protected logger: Logger
+    protected provider: any
     protected contractFreedomEnterprise: any
     protected contractFreedomCash: any
 
-    protected constructor(logger: Logger, contractFreedomEnterprise: any, contractFreedomCash: any) {
+    protected constructor(logger: Logger, contractFreedomEnterprise: any, contractFreedomCash: any, provider: any) {
         this.logger = logger
+        this.provider = provider
         this.contractFreedomEnterprise = contractFreedomEnterprise
         this.contractFreedomCash = contractFreedomCash
     }
@@ -77,6 +79,13 @@ export class FreedomEnterprise {
         }
     }
 
+    public async claimRewards(): Promise<void> {
+        this.logger.info(`claimingRewards`)
+        this.logger.info(`fc balance in smart contract before: ${await this.contractFreedomCash.balanceOf(FE)}`)
+        await this.awaitTransaction(await this.contractFreedomEnterprise.claimRewards())
+        this.logger.info(`fc balance in smart contract after : ${await this.contractFreedomCash.balanceOf(FE)}`)
+    }
+
     public async setCompletionLevel(taskID: number, completionLevel: number): Promise<void> {
         this.logger.info(`setting completion level for task ${taskID} to: ${completionLevel}`)
         try {
@@ -86,16 +95,21 @@ export class FreedomEnterprise {
         }
     }
 
+    public async logWhatsUp() {
+        this.logger.debug(`task counter: ${await this.getTaskCounter()}`)
+        this.logger.debug(`funding counter: ${await this.getFundingCounter()}`)
+        this.logger.debug(`solution counter ${await this.getSolutionCounter()}`)
+        this.logger.debug(`claimable reward ${await this.getClaimableReward("0x7A915e362353d72570dcf90aa5BAA1C5B341c7AA")}`)
+        this.logger.debug(`task 1: ${await this.getTask(1)}`)
+        this.logger.debug(`solution 1: ${await this.getSolution(1)}`)
+        this.logger.debug(`funding 1: ${await this.getFunding(1)}`)
+        this.logger.debug(`funding 2: ${await this.getFunding(2)}`)
+        this.logger.debug(`funding 3: ${await this.getFunding(3)}`)
+    }
+
     public async getClaimableReward(receiver: string): Promise<bigint> {
         this.logger.info(`getting claimable rewards for ${receiver}`)
         return this.contractFreedomEnterprise.getClaimableReward(receiver)
-    }
-
-    public async claimRewards(): Promise<void> {
-        this.logger.info(`claimingRewards`)
-        this.logger.info(`fc balance in smart contract before: ${await this.contractFreedomCash.balanceOf(FE)}`)
-        await this.awaitTransaction(await this.contractFreedomEnterprise.claimRewards())
-        this.logger.info(`fc balance in smart contract after : ${await this.contractFreedomCash.balanceOf(FE)}`)
     }
 
     public async getTask(taskID: number): Promise<ITask> {
@@ -130,19 +144,8 @@ export class FreedomEnterprise {
         return {
             from: raw[0],
             amount: raw[1],
-            timestamp: raw[2]
-        }
-    }
-    public async getReward(rewardID: number): Promise<ITask> {
-        this.logger.info(`reading reward ${rewardID}`)
-        const raw = await this.contractFreedomEnterprise.tasks(rewardID)
-        this.logger.info(`${raw}`)
-
-        return {
-            to: raw[0],
-            amount: raw[1],
-            timestamp: raw[2],
-            claimed: raw[3]
+            assignedAmount: raw[2],
+            timestamp: raw[3]
         }
     }
     public async getTaskCounter(): Promise<number> {
